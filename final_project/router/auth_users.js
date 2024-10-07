@@ -48,7 +48,7 @@ regd_users.post("/login", (req, res) => {
 
 
 
-//add or modify a book review
+//add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
     const isbn = req.params.isbn; //get isbn from URL params
     const review = req.query.review; //get review from query parameters
@@ -73,6 +73,27 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
         return res.status(200).json({ message: "review successfully added/updated" });
     } else {
         return res.status(401).json({ message: "unauthorized user" });
+    }
+});
+
+//delete a book review
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    const isbn = req.params.isbn; //get ISBN from URL parameters
+    const username = req.session.username; //get the logged-in username from session
+
+    //check if the book exists
+    if (!books[isbn]) {
+        return res.status(404).json({ message: "book not found" });
+    }
+
+    //check if the user has a review for the book
+    const userReviews = books[isbn].reviews;
+    if (userReviews && userReviews[username]) {
+        //delete the user's review
+        delete userReviews[username];
+        return res.status(200).json({ message: "review successfully deleted" });
+    } else {
+        return res.status(400).json({ message: "no review found for the user" });
     }
 });
 
